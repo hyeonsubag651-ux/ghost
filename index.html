@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>미니 SNS</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 500px;
+      padding: 15px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      border-radius: 10px;
+      border: none;
+      padding: 10px;
+      resize: none;
+      font-size: 14px;
+    }
+
+    input[type="file"] {
+      margin-top: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #38bdf8;
+      font-weight: bold;
+    }
+
+    .post {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 15px;
+      margin-top: 10px;
+    }
+
+    .post img {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="card">
+    <h2>📸 게시 만들기</h2>
+
+    <textarea id="text" placeholder="무슨 생각 중?"></textarea>
+
+    <input type="file" id="image" accept="image/*">
+
+    <button onclick="addPost()">게시하기</button>
+  </div>
+
+  <div id="feed"></div>
+
+</div>
+
+<script>
+  let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+  render();
+
+  function addPost() {
+    let text = document.getElementById("text").value;
+    let file = document.getElementById("image").files[0];
+
+    if (!text && !file) return;
+
+    if (file) {
+      let reader = new FileReader();
+
+      reader.onload = function(e) {
+        savePost(text, e.target.result);
+      };
+
+      reader.readAsDataURL(file);
+    } else {
+      savePost(text, null);
+    }
+  }
+
+  function savePost(text, image) {
+    posts.unshift({
+      text: text,
+      image: image,
+      time: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("posts", JSON.stringify(posts));
+
+    document.getElementById("text").value = "";
+    document.getElementById("image").value = "";
+
+    render();
+  }
+
+  function render() {
+    let feed = document.getElementById("feed");
+    feed.innerHTML = "";
+
+    posts.forEach(p => {
+      let div = document.createElement("div");
+      div.className = "post";
+
+      div.innerHTML = `
+        <div>${p.text}</div>
+        ${p.image ? `<img src="${p.image}">` : ""}
+        <small>${p.time}</small>
+      `;
+
+      feed.appendChild(div);
+    });
+  }
+</script>
+
+</body>
+</html>
